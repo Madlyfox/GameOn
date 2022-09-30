@@ -14,12 +14,21 @@ const modalClose = document.querySelectorAll(".close");
 const formData = document.querySelectorAll(".formData");
 
 const form = document.getElementById("form");
-const firstname = document.getElementById("firstname");
-const lastname = document.getElementById("lastname");
-const email = document.getElementById("email");
-const birthdate = document.getElementById("birthdate");
-const quantity = document.getElementById("quantity");
+const firstnameEl = document.getElementById("firstname");
+const lastnameEl = document.getElementById("lastname");
+const emailEl = document.getElementById("email");
+const birthdateEl = document.getElementById("birthdate");
+const quantityEl = document.getElementById("quantity");
 const radios = document.getElementsByName("location");
+
+const isRequired = (value) => (value === "" ? false : true);
+const isBetween = (length, min, max) =>
+  length < min || length > max ? false : true;
+const isEmailValid = (email) => {
+  const re =
+    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return re.test(email);
+};
 
 // launch modal event
 modalBtn.forEach((btn) => btn.addEventListener("click", launchModal));
@@ -38,85 +47,177 @@ function closeModal() {
 
 //FORM VALIDATION
 
-//Show input error messages
+//SHOW ERROR
+
 function showError(input, message) {
+  // get the form-field element
   const formControl = input.parentElement;
-  formControl.className = "form-control error";
+  // add the error class
+  formControl.classList.remove("success");
+  formControl.classList.add("error");
+  // show the error message
   const small = formControl.querySelector("small");
   small.innerText = message;
 }
 
-//check location
+//SHOW SUCCES
 
-function checkLocation(input) {
-  for (var i = 0, length = input.length; i < length; i++) {
-    if (input[i].checked) {
-      showSucces(input[i]);
+const showSuccess = (input) => {
+  // get the form-field element
+  const formConstrol = input.parentElement;
 
-      break;
-    } else {
-      showError(input[i], "Location is required");
-    }
-  }
-}
+  // remove the error class
+  formConstrol.classList.remove("error");
+  formConstrol.classList.add("success");
 
-//show success colour
-function showSucces(input) {
-  const formControl = input.parentElement;
-  formControl.className = "form-control success";
-}
+  // hide the error message
+  const error = formConstrol.querySelector("small");
+  error.textContent = "";
+};
 
-//check email is valid
-function checkEmail(input) {
-  const re =
-    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  if (re.test(input.value.trim())) {
-    showSucces(input);
-  } else {
-    showError(input, "Email is not invalid");
-  }
-}
+//CHECK FIRSTNAME
 
-//checkRequired fields
-function checkRequired(inputArr) {
-  inputArr.forEach(function (input) {
-    if (input.value.trim() === "") {
-      showError(input, `${getFieldName(input)} is required`);
-    } else {
-      showSucces(input);
-    }
-  });
-}
+const checkFirstname = () => {
+  let valid = false;
+  const min = 3,
+    max = 25;
+  const firstname = firstnameEl.value.trim();
 
-//check input Length
-function checkLength(input, min, max) {
-  if (input.value.length < min) {
+  if (!isRequired(firstname)) {
+    showError(firstnameEl, "Firstname cannot be blank.");
+  } else if (!isBetween(firstname.length, min, max)) {
     showError(
-      input,
-      `${getFieldName(input)} must be at least ${min} characters`
-    );
-  } else if (input.value.length > max) {
-    showError(
-      input,
-      `${getFieldName(input)} must be les than ${max} characters`
+      firstnameEl,
+      `Firstname must be between ${min} and ${max} characters.`
     );
   } else {
-    showSucces(input);
+    showSuccess(firstnameEl);
+    valid = true;
   }
-}
+  return valid;
+};
 
-//get FieldName
-function getFieldName(input) {
-  return input.id.charAt(0).toUpperCase() + input.id.slice(1);
-}
+//CHECK LASTNAME
 
-//Event Listeners
+const checkLastname = () => {
+  let valid = false;
+  const min = 3,
+    max = 25;
+  const lastname = lastnameEl.value.trim();
+
+  if (!isRequired(lastname)) {
+    showError(lastnameEl, "Lastname cannot be blank.");
+  } else if (!isBetween(lastname.length, min, max)) {
+    showError(
+      lastnameEl,
+      `Lastname must be between ${min} and ${max} characters.`
+    );
+  } else {
+    showSuccess(lastnameEl);
+    valid = true;
+  }
+  return valid;
+};
+
+//CHECK EMAIL
+
+const checkEmail = () => {
+  let valid = false;
+  const email = emailEl.value.trim();
+  if (!isRequired(email)) {
+    showError(emailEl, "Email cannot be blank.");
+  } else if (!isEmailValid(email)) {
+    showError(emailEl, "Email is not valid.");
+  } else {
+    showSuccess(emailEl);
+    valid = true;
+  }
+  return valid;
+};
+
+//CHECK BIRTHDATE
+
+const checkBirthdate = () => {
+  let valid = false;
+
+  const birthdate = birthdateEl;
+
+  if (birthdate.value.trim() === "") {
+    showError(birthdate, "Birthdate cannot be blank");
+  } else {
+    showSuccess(birthdate);
+    valid = true;
+  }
+  return valid;
+};
+
+//CHECK LOCATION
+
+const checkLocation = () => {
+  let valid = false;
+
+  const location = radios;
+
+  for (var i = 0, length = location.length; i < length; i++) {
+    if (
+      !(
+        location[0].checked ||
+        location[1].checked ||
+        location[2].checked ||
+        location[3].checked ||
+        location[4].checked ||
+        location[5].checked
+      )
+    ) {
+      showError(location[i], "Location is required");
+    } else {
+      showSuccess(location[i]);
+      valid = true;
+    }
+    return valid;
+  }
+};
+
 form.addEventListener("submit", function (e) {
-  e.preventDefault();
+  // prevent the form from submitting
 
-  checkRequired([firstname, email, lastname, birthdate, quantity]);
-  checkLength(firstname, 2, 15);
-  checkLength(lastname, 2, 25);
-  checkLocation(radios);
-  checkEmail(email);
+  // validate forms
+  let isFirstnameValid = checkFirstname(),
+    isLastnameValid = checkLastname(),
+    isEmailValid = checkEmail(),
+    isBirthdateValid = checkBirthdate();
+  isLocationValid = checkLocation();
+  let isFormValid =
+    isFirstnameValid &&
+    isLastnameValid &&
+    isEmailValid &&
+    isBirthdateValid &&
+    isLocationValid;
+
+  // submit to the server if the form is valid
+  if (isFormValid) {
+    alert("Merci, votre inscription a bine été prise en compte !");
+  } else {
+    e.preventDefault();
+  }
+});
+
+form.addEventListener("input", function (e) {
+  switch (e.target.id) {
+    case "firstname":
+      checkFirstname();
+      break;
+    case "lastname":
+      checkLastname();
+      break;
+    case "email":
+      checkEmail();
+      break;
+    case "birthdate":
+      checkBirthdate();
+      break;
+    case "location":
+      checkLocation();
+      break;
+  }
 });
